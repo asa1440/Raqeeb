@@ -32,6 +32,7 @@
         --or: #fb923c;
         --rd: #f43f5e;
         --bl: #818cf8;
+        --muted-foreground: #111a2eb5;
         box-sizing: border-box;
         padding-top: env(safe-area-inset-top, 0px);
         padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -67,17 +68,39 @@
       }
       .logo {
         font-weight: 700;
-        font-size: 16px;
+        font-size: 25px;
         padding: 4px 10px 16px;
         display: flex;
         gap: 8px;
         align-items: center;
       }
+      .logo span {
+        color: transparent;
+        background: linear-gradient(
+          110deg,
+          var(--tx) 0%,
+          var(--tx) 40%,
+          #fff 48%,
+          #a5f3fc 52%,
+          var(--tx) 60%,
+          var(--tx) 100%
+        );
+        background-size: 250% 100%;
+        background-position: 0 50%;
+        background-clip: text;
+        -webkit-background-clip: text;
+        animation: logo-shimmer 3.2s ease-in-out infinite alternate;
+      }
+      @keyframes logo-shimmer {
+        to {
+          background-position: 100% 50%;
+        }
+      }
       .logo i {
         width: 26px;
         height: 26px;
         border-radius: 8px;
-        background: linear-gradient(135deg, var(--cy), var(--bl));
+        
       }
       nav a {
         display: flex;
@@ -471,6 +494,104 @@
       .nt.cr {
         box-shadow: 0 0 16px #f43f5e33;
       }
+      .chat-launch {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        z-index: 40;
+        border: 1px solid #22d3ee66;
+        background: var(--c2);
+        color: var(--cy);
+        padding: 11px 15px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 8px 24px #0008;
+      }
+      #chat {
+        position: fixed;
+        right: 22px;
+        bottom: 78px;
+        z-index: 40;
+        width: 380px;
+        max-width: calc(100vw - 28px);
+        height: min(520px, calc(100dvh - 110px));
+        display: none;
+        grid-template-rows: auto 1fr auto;
+        background: var(--card);
+        border: 1px solid var(--bd);
+        border-radius: 14px;
+        box-shadow: 0 18px 50px #000a;
+        overflow: hidden;
+      }
+      #chat.on {
+        display: grid;
+      }
+      #chatHead,
+      #chatForm {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 12px;
+      }
+      #chatHead {
+        background: var(--c2);
+        border-bottom: 1px solid var(--bd);
+      }
+      #chatForm {
+        border-top: 1px solid var(--bd);
+      }
+      #chatLog {
+        padding: 12px;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .chat-msg {
+        max-width: 92%;
+        padding: 9px 11px;
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+        background: var(--c2);
+        font-size: 13px;
+        white-space: pre-wrap;
+      }
+      .chat-msg.user {
+        align-self: flex-end;
+        border-color: #22d3ee55;
+        background: #22d3ee12;
+      }
+      .chat-result {
+        width: 100%;
+        padding: 11px;
+        border: 1px solid #22d3ee55;
+        border-radius: 10px;
+        background: #22d3ee0b;
+        font-size: 13px;
+      }
+      .chat-result div {
+        margin: 4px 0;
+      }
+      .chat-result small {
+        color: var(--mu);
+      }
+      #chatInput {
+        flex: 1;
+        min-width: 0;
+        background: var(--c2);
+        border: 1px solid var(--bd);
+        border-radius: 9px;
+        color: var(--tx);
+        padding: 9px 10px;
+        font: inherit;
+        outline: 0;
+      }
+      #chatInput:focus {
+        border-color: var(--cy);
+      }
       .ev {
         display: grid;
         grid-template-columns: 58px 1fr;
@@ -603,7 +724,7 @@
   <body>
     <div class="app">
       <nav>
-        <div class="logo"><i></i><span>SentinelOps</span></div>
+        <div class="logo"><i></i><span>Raqeeb</span></div>
         <div id="nl"></div>
         <div class="sys">
           <div>
@@ -629,11 +750,67 @@
         <main id="main"></main>
       </div>
     </div>
+    <button
+      class="chat-launch"
+      type="button"
+      onclick="toggleChat()"
+      aria-controls="chat"
+      aria-expanded="false"
+    >
+      ◌ Person Search
+    </button>
+    <section id="chat" aria-label="Person search assistant">
+      <div id="chatHead">
+        <div>
+          <b>Person Search Assistant</b>
+          <div class="mu" style="font-size: 11px">Simulated, anonymous records</div>
+        </div>
+        <button
+          class="x"
+          type="button"
+          onclick="toggleChat()"
+          aria-label="Close assistant"
+        >
+          ×
+        </button>
+      </div>
+      <div id="chatLog" aria-live="polite">
+        <div class="chat-msg">
+          Describe someone to search the demo records. Try: “Find a person wearing a blue shirt.”
+        </div>
+        <button
+          class="chip"
+          type="button"
+          onclick="chatSearch('Find a person wearing a blue shirt')"
+        >
+          Find person in a blue shirt
+        </button>
+      </div>
+      <form id="chatForm" onsubmit="submitChat(event)">
+        <input
+          id="chatInput"
+          autocomplete="off"
+          placeholder="Describe clothing, location, or ID…"
+          aria-label="Describe a person"
+        />
+        <button class="btn" type="submit" aria-label="Search">Search</button>
+      </form>
+    </section>
     <div id="m" class="ov" onclick="if (event.target == this) closeM();">
       <div id="mb" class="md"></div>
     </div>
     <div id="ts"></div>
     <script>
+      const PERSON_APPEARANCE = {
+        "P-10482": "Blue shirt",
+        "P-08321": "Black jacket",
+        "P-12091": "White shirt",
+        "P-07750": "Red jacket",
+        "P-09977": "Green shirt",
+        "P-11420": "Gray jacket",
+        "P-13005": "Navy shirt",
+        "P-12888": "Yellow top",
+      };
       const $ = (s) => document.querySelector(s),
         pad = (n) => String(n).padStart(2, "0");
       const COL = {
@@ -1506,6 +1683,74 @@
 <div><h2>Movement timeline</h2><div class="tl"><div><b>${p[1]}</b> CAM-01 · Main Entrance<br><span class="mu">Entered venue</span></div><div><b>${f(((mn(p[1]) + mn(p[2])) / 2) | 0)}</b> CAM-12 · Hall corridor<br><span class="mu">Movement tracked</span></div><div><b>${p[2]}</b> ${p[4]} · ${p[3]}<br><span class="mu">${p[5]}</span></div></div></div><div><h2>Associated alerts</h2><div class="g">${al.map(arow).join("") || '<span class="mu">None</span>'}</div></div>`,
           "dr",
         );
+      }
+      function toggleChat() {
+        const panel = $("#chat"),
+          opened = panel.classList.toggle("on");
+        $(".chat-launch").setAttribute("aria-expanded", opened);
+        if (opened) $("#chatInput").focus();
+      }
+      function chatMessage(text, role) {
+        const node = document.createElement("div");
+        node.className = "chat-msg " + role;
+        node.textContent = text;
+        $("#chatLog").append(node);
+        $("#chatLog").scrollTop = $("#chatLog").scrollHeight;
+      }
+      function submitChat(event) {
+        event.preventDefault();
+        const input = $("#chatInput"),
+          query = input.value.trim();
+        if (query) chatSearch(query);
+      }
+      function chatSearch(query) {
+        const text = query.trim();
+        if (!text) return;
+        chatMessage(text, "user");
+        $("#chatInput").value = "";
+        const normalized = text.toLowerCase(),
+          id = P.find((p) => normalized.includes(p[0].toLowerCase()))?.[0],
+          colors = {
+            blue: ["blue", "azraq", "أزرق", "ازرق"],
+            black: ["black", "aswad", "أسود", "اسود"],
+            white: ["white", "abyad", "أبيض", "ابيض"],
+            red: ["red", "ahmar", "أحمر", "احمر"],
+            green: ["green", "akhdar", "أخضر", "اخضر"],
+            gray: ["gray", "grey", "رمادي"],
+            navy: ["navy", "كحلي"],
+            yellow: ["yellow", "أصفر", "اصفر"],
+          },
+          matchColor = Object.keys(colors).find((key) =>
+            colors[key].some((word) => normalized.includes(word)),
+          ),
+          results = P.filter((p) =>
+            id
+              ? p[0] == id
+              : matchColor
+                ? PERSON_APPEARANCE[p[0]].toLowerCase().includes(matchColor)
+                : [p[0], p[3], p[4], p[5], PERSON_APPEARANCE[p[0]]]
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(normalized),
+          );
+        if (!results.length) {
+          chatMessage(
+            "No match found in the simulated records. Try a clothing color, location, activity, or Person ID.",
+            "assistant",
+          );
+          return;
+        }
+        chatMessage(
+          `Found ${results.length} simulated match${results.length == 1 ? "" : "es"}${matchColor ? " wearing " + matchColor + " clothing" : ""}. Results are demo data, not live identification.`,
+          "assistant",
+        );
+        results.forEach((p) => {
+          const card = document.createElement("div");
+          card.className = "chat-result";
+          card.innerHTML = `<b>${p[0]}</b><div><small>Appearance</small> ${PERSON_APPEARANCE[p[0]]}</div><div><small>Last seen</small> ${p[2]} · ${p[3]}</div><div><small>Camera</small> ${p[4]}</div><div><small>Recorded activity</small> ${p[5]}</div><button class="chip" type="button" onclick="toggleChat();openPerson('${p[0]}')">Open movement timeline</button>`;
+          $("#chatLog").append(card);
+        });
+        $("#chatLog").scrollTop = $("#chatLog").scrollHeight;
       }
       function tick() {
         if (!S.demo) return;
